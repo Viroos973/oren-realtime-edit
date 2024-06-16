@@ -1,9 +1,8 @@
-const mongoose = require('mongoose');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../Model/user.model");
 
-exports.user_signup = (req, res, next)=>{ //409 for confilct or 422 for unaccessible entity
+exports.user_signup = (req, res)=>{ //409 for confilct or 422 for unaccessible entity
     console.log(req.body)
 
     User.find({email: req.body.email})
@@ -51,7 +50,7 @@ exports.user_signup = (req, res, next)=>{ //409 for confilct or 422 for unaccess
         })
 }
 
-exports.user_login = (req, res, next)=>{
+exports.user_login = (req, res)=>{
     User.findOne({email: req.body.email})
         .then( user =>{
             if(user){

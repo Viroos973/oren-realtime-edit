@@ -1,8 +1,7 @@
 const mongoose = require("mongoose")
-const Document = require("./Document")
+const Document = require("./Model/Document")
 var jwtAuth = require('socketio-jwt-auth');
 const User = require("./Model/user.model");
-const jwt = require("jsonwebtoken");
 
 mongoose.connect("mongodb://127.0.0.1:27017/google-docs-clone", {
   useNewUrlParser: true,
@@ -71,8 +70,6 @@ io.on("connection", socket => {
   })
 })
 
-
-
 async function findOrCreateDocument(id) {
   if (id == null) return
 
@@ -81,7 +78,6 @@ async function findOrCreateDocument(id) {
   return await Document.create({ _id: id, data: defaultValue, columns: defaultValue })
 }
 
-const express = require("express");
 const PORT = process.env.PORT || 5000;
 
 const app = require("./app");

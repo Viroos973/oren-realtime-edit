@@ -2,14 +2,7 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
-
-
 const userRoutes = require("./router/user");
-
-
-
-
 
 app.use(morgan('dev')); //To log something to the console showing the path and action after a request have been made
 // app.use(express.json());
@@ -49,8 +42,5 @@ app.use((error, req, res, next)=>{
         }
     });
 })
-
-
-
 
 module.exports = app;
