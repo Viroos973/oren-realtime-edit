@@ -1,12 +1,19 @@
 const mongoose = require("mongoose")
 const Document = require("./Document")
+var jwtAuth = require('socketio-jwt-auth');
+const User = require("./Model/user.model");
+const jwt = require("jsonwebtoken");
 
-mongoose.connect("mongodb://localhost/google-docs-clone", {
+mongoose.connect("mongodb://127.0.0.1:27017/google-docs-clone", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
   useCreateIndex: true,
-})
+}).then(() => {
+  console.log('Connected to MongoDB successfully');
+}).catch((error) => {
+  console.error('Connection error:', error);
+});
 
 const io = require("socket.io")(3001, {
   cors: {
@@ -16,6 +23,25 @@ const io = require("socket.io")(3001, {
 })
 
 const defaultValue = null
+
+io.use(jwtAuth.authenticate({
+  secret: 'secret',    // required, used to verify the token's signature
+  algorithm: 'HS256'        // optional, default to be HS256
+}, function(payload, done) {
+  // done is a callback, you can use it as follows
+  User.findOne({id: payload.sub}, function(err, user) {
+    if (err) {
+      // return error
+      return done(err);
+    }
+    if (!user) {
+      // return fail with an error message
+      return done(null, false, 'user does not exist');
+    }
+    // return success with a user info
+    return done(null, user);
+  });
+}));
 
 io.on("connection", socket => {
   socket.on("get-document", async tableId => {
@@ -45,6 +71,8 @@ io.on("connection", socket => {
   })
 })
 
+
+
 async function findOrCreateDocument(id) {
   if (id == null) return
 
@@ -52,3 +80,12 @@ async function findOrCreateDocument(id) {
   if (document) return document
   return await Document.create({ _id: id, data: defaultValue, columns: defaultValue })
 }
+
+const express = require("express");
+const PORT = process.env.PORT || 5000;
+
+const app = require("./app");
+
+app.listen(PORT , ()=>{
+  console.log("Running on port :"+PORT);
+})
