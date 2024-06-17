@@ -3,6 +3,8 @@ const app = express();
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const userRoutes = require("./router/user");
+const roomRoutes = require("./router/room");
+const tableRoutes = require("./router/table");
 
 app.use(morgan('dev')); //To log something to the console showing the path and action after a request have been made
 // app.use(express.json());
@@ -26,6 +28,8 @@ app.use((req, res, next)=>{
 
 //Routes Middlewar
 app.use("/users", userRoutes);
+app.use("/rooms", roomRoutes);
+app.use("/tables", tableRoutes);
 
 
 //Handling errors
@@ -35,7 +39,7 @@ app.use((req, res, next)=>{
     next(error);
 });
 
-app.use((error, req, res, next)=>{
+app.use((error, req, res)=>{
     res.status(error.status || 500).json({
         error: {
             message: error.message

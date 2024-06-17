@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const uuid = require("uuid")
 const User = require("../Model/user.model");
 
 exports.user_signup = (req, res)=>{ //409 for confilct or 422 for unaccessible entity
@@ -19,6 +20,7 @@ exports.user_signup = (req, res)=>{ //409 for confilct or 422 for unaccessible e
                         })
                     }else{
                         const newUser = new User({
+                            _id: uuid.v4(),
                             email: req.body.email,
                             password: hashedPassword
                         });
@@ -87,7 +89,7 @@ exports.user_login = (req, res)=>{
         })
 }
 
-exports.user_delete = (req, res, next)=>{
+exports.user_delete = (req, res)=>{
     User.findByIdAndDelete({_id: req.params.userId})
         .then( user =>{
             if(user){

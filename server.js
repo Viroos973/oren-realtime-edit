@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
-const Document = require("./Model/Document")
-var jwtAuth = require('socketio-jwt-auth');
+const Document = require("./Model/document.model")
+const jwtAuth = require('socketio-jwt-auth');
 const User = require("./Model/user.model");
 
 mongoose.connect("mongodb://127.0.0.1:27017/google-docs-clone", {
@@ -20,8 +20,6 @@ const io = require("socket.io")(3001, {
     methods: ["GET", "POST"],
   },
 })
-
-const defaultValue = null
 
 io.use(jwtAuth.authenticate({
   secret: 'secret',    // required, used to verify the token's signature
@@ -43,10 +41,15 @@ io.use(jwtAuth.authenticate({
 }));
 
 io.on("connection", socket => {
-  socket.on("get-document", async tableId => {
-    const table = await findOrCreateDocument(tableId)
-    socket.join(tableId)
-    socket.emit("load-document", table.data, table.columns)
+  socket.on("get-document", async (tableId, roomId) => {
+    const table = await findDocumentOrNull(tableId, roomId)
+
+    if (table == null) {
+      socket.emit("load-document", false)
+    } else {
+      socket.join(tableId)
+      socket.emit("load-document", true, table.data, table.columns)
+    }
 
     socket.on("click-mouse", (row, col, userId) => {
       socket.broadcast.to(tableId).emit("set-color", row, col, userId)
@@ -70,12 +73,12 @@ io.on("connection", socket => {
   })
 })
 
-async function findOrCreateDocument(id) {
-  if (id == null) return
+async function findDocumentOrNull(tableId, roomId) {
+  if (tableId == null || roomId == null) return
 
-  const document = await Document.findById(id)
+  const document = await Document.findOne({_id: tableId, room_id: roomId})
   if (document) return document
-  return await Document.create({ _id: id, data: defaultValue, columns: defaultValue })
+  return null
 }
 
 const PORT = process.env.PORT || 5000;
