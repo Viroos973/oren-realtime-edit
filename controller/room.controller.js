@@ -165,7 +165,7 @@ exports.rename_room = (req, res) => {
             room.name = req.body.name
             return room.save()
         })
-        .then(savedRoom => {
+        .then(savedRooms => {
             res.status(200).json({
                 message: `Room updated successfully`
             });
